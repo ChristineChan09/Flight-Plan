@@ -20,6 +20,20 @@
                ReferencedContainer = "container:Flight Plan.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D90647021D3642F600B0434A"
+               BuildableName = "Flight PlanTests.xctest"
+               BlueprintName = "Flight PlanTests"
+               ReferencedContainer = "container:Flight Plan.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
