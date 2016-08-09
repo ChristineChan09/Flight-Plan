@@ -8,24 +8,26 @@
 import SpriteKit
 
 enum ThreeSceneState {
-    case Active, Paused, GameOver
+    case Active, GameOver
 }
 
 class ThreeScene: SKScene, SKPhysicsContactDelegate {
     
     /* Camera helpers */
     var littleBird: SKSpriteNode!
-    var enemyBird: SKSpriteNode!
     var square: SKSpriteNode!
     var cameraTarget: SKNode!
-    var lastPosition: CGFloat = 0
-    var backgroundMusic: SKAudioNode!
     
     /* UI Connections */
     var backArrow: MSButtonNode!
     var nextArrow: MSButtonNode!
     var rainbow: MSButtonNode!
+    var enemyBird: SKSpriteNode!
+    var lastPosition: CGFloat = 0
+    var backgroundMusic: SKAudioNode!
     var canDrawPath: Bool!
+    var defaultColor: SKColor = SKColor.whiteColor()
+    var previousSquare: SKNode?
     
     /* Change game state */
     var threeState: ThreeSceneState = .Active
@@ -33,12 +35,14 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
     override func didMoveToView(view: SKView) {
         /* Set reference to game object connections node */
         
-        if let musicURL = NSBundle.mainBundle().URLForResource("Calm_music", withExtension: "mp3") {
-            backgroundMusic = SKAudioNode(URL: musicURL)
+        if musicState == true {
+            let musicURL = NSBundle.mainBundle().URLForResource("Game-music", withExtension: "mp3")
+            backgroundMusic = SKAudioNode(URL: musicURL!)
             addChild(backgroundMusic)
         }
         
         littleBird = self.childNodeWithName("littleBird") as! SKSpriteNode
+        defaultColor = littleBird.color
         
         /* Set UI connections */
             backArrow = self.childNodeWithName("backArrow") as! MSButtonNode
@@ -100,26 +104,13 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
             }
         
                 /* Rainbow button selection handler */
-                self.rainbow.selectedHandler = {
-                    
-                    /* Grab reference to our SpriteKit view */
-                    let skView = self.view as SKView!
-                    
-                    /* Ensure correct aspect mode */
-                    self.scene!.scaleMode = .AspectFill
-                    
-                    /* Show debug */
-                    skView.showsPhysics = false
-                    skView.showsDrawCount = false
-                    skView.showsFPS = false
-                    
-                    /* Start game scene */
-                    skView.presentScene(self.scene)
-                }
+                self.rainbow.selectedHandler = {}
             }
 
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?){
         /* Called when a touch begins */
+        if threeState != .Active {return}
+        
         for child in self.children {
             if child.name == "square"{
                 child.removeFromParent()
@@ -130,6 +121,7 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
         if littleBird.containsPoint(location) {
             // the user is touching the bird
             canDrawPath = true
+            littleBird.color = .grayColor()
         }
         else {
             // the user is not touching the bird; don't start drawing
@@ -138,25 +130,51 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        if threeState != .Active { return }
+        
         /* Called when a touch moves */
         for touch in touches {
             
             let location = touch.locationInNode(self)
+            if location.x < 0 || location.y < 0 || location.x > 1344 || location.y > 750{return}
             
-            let square = SKSpriteNode(imageNamed: "Square")
-            square.name = "square"
-            self.addChild(square)
-            square.xScale = 0.06
-            square.yScale = 0.06
-            square.position = location
-            
+            if previousSquare == nil {
+                // this is the first square
+                let square = SKSpriteNode(color: SKColor.blackColor(), size: CGSize(width: 16, height: 16))
+                square.name = "square"
+                self.addChild(square)
+                square.position = location
+                previousSquare = square
+            }
+            else {
+                // connect the previous square to the touch location
+                
+                let previousLocation = previousSquare!.convertPoint(CGPoint(x: -8, y: 0), toNode: self)
+                let diff = location - previousLocation
+                
+                if diff.length() > 16 {
+                    let center = (location + previousLocation) * 0.5
+                    
+                    let square = SKSpriteNode(color: SKColor.blackColor(), size: CGSize(width: 16, height: 16))
+                    square.xScale = diff.length() / 16
+                    square.zRotation = -CGFloat(atan2f(Float(diff.x), Float(diff.y))) - CGFloat(M_PI_2)
+                    square.name = "square"
+                    self.addChild(square)
+                    square.position = center
+                    previousSquare = square
+                }
+            }
         }
     }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
         /* Set camera to follow lines */
+        if threeState != .Active {return}
+        
+        littleBird.color = defaultColor
         cameraTarget = littleBird
         littleBird.removeAllActions()
+        previousSquare = nil
  
         let path = CGPathCreateMutable()
         CGPathMoveToPoint(path, nil, littleBird.position.x, littleBird.position.y);
@@ -165,16 +183,16 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
             for child in self.children {
                 if child.name == "square" {
                     CGPathAddLineToPoint(path, nil, child.position.x, child.position.y + 50);
-                    
-                    let move = SKAction.followPath(path, asOffset:false, orientToPath:false, duration:2.0)
-                    littleBird.runAction(move)
                 }
             }
+                let move = SKAction.followPath(path, asOffset:false, orientToPath:false, duration:2.0)
+                littleBird.runAction(move)
+            }
         }
-    }
     
         override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
+        if threeState != .Active {return}
         
         // Camera follows lines
         if let cameraTarget = cameraTarget {camera?.position = cameraTarget.position}
@@ -220,10 +238,21 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
         littleBird.removeAllActions()
         }
 
-        func win() { nextArrow.hidden = false; backArrow.hidden = false; rainbow.hidden = false;
+        func win() {
+            littleBird.removeAllActions()
+            for child in self.children {
+                if child.name == "square"{
+                    child.removeFromParent()
+                }
+            }
+
+        threeState = .GameOver
+            
+        nextArrow.hidden = false; backArrow.hidden = false; rainbow.hidden = false;
         littleBird.removeAllActions()
-        self.runAction(SKAction.playSoundFileNamed("Fanfare.wav", waitForCompletion: true))
-            let gameState: GameSceneState = .Paused
-            self.runAction(SKAction.playSoundFileNamed("Fanfare.wav", waitForCompletion: false))
+       
+        if musicState == true {
+            self.runAction(SKAction.playSoundFileNamed("Winning-sound.wav", waitForCompletion: false))
+        }
     }
 }

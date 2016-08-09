@@ -8,23 +8,25 @@
 import SpriteKit
 
 enum TwoSceneState {
-    case Active, Paused, GameOver
+    case Active, GameOver
 }
 
 class TwoScene: SKScene, SKPhysicsContactDelegate {
     
     /* Camera helpers */
     var biggerBird: SKSpriteNode!
-    var square: SKSpriteNode!
+    var circle: SKSpriteNode!
     var cameraTarget: SKNode!
-    var lastPosition: CGFloat = 0
-    var backgroundMusic: SKAudioNode!
     
     /* UI Connections */
     var backArrow: MSButtonNode!
     var nextArrow: MSButtonNode!
     var rainbow: MSButtonNode!
+    var lastPosition: CGFloat = 0
+    var backgroundMusic: SKAudioNode!
     var canDrawPath: Bool!
+    var defaultColor: SKColor = SKColor.whiteColor()
+    var previousCircle: SKNode?
     
     /* Change game state */
     var twoState: TwoSceneState = .Active
@@ -32,12 +34,15 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
     override func didMoveToView(view: SKView) {
         /* Set reference to game object connections node */
         
-        if let musicURL = NSBundle.mainBundle().URLForResource("Calm_music", withExtension: "mp3") {
-            backgroundMusic = SKAudioNode(URL: musicURL)
+        if musicState == true {
+            let musicURL = NSBundle.mainBundle().URLForResource("Game-music", withExtension: "mp3")
+            backgroundMusic = SKAudioNode(URL: musicURL!)
             addChild(backgroundMusic)
+            
         }
         
         biggerBird = childNodeWithName("biggerBird") as! SKSpriteNode
+        defaultColor = biggerBird.color
         
         /* Set UI connections */
         backArrow = self.childNodeWithName("backArrow") as! MSButtonNode
@@ -99,28 +104,16 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
         }
         
         /* Rainbow button selection handler */
-        self.rainbow.selectedHandler = {
+        self.rainbow.selectedHandler = {}
             
-            /* Grab reference to our SpriteKit view */
-            let skView = self.view as SKView!
-            
-            /* Ensure correct aspect mode */
-            self.scene!.scaleMode = .AspectFill
-            
-            /* Show debug */
-            skView.showsPhysics = false
-            skView.showsDrawCount = false
-            skView.showsFPS = false
-            
-            /* Start game scene */
-            skView.presentScene(self.scene)
-        }
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         /* Called when a touch begins */
+        if twoState != .Active { return }
+        
         for child in self.children {
-            if child.name == "square" {
+            if child.name == "circle" {
                 child.removeFromParent()
             }
         }
@@ -129,6 +122,7 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
         if biggerBird.containsPoint(location) {
             // the user is touching the bird
             canDrawPath = true
+            biggerBird.color = .grayColor()
         }
         else {
             // the user is not touching the bird; don't start drawing
@@ -138,44 +132,69 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        /* Called when a touch moves */
+        if twoState != .Active { return }
         
-            for touch in touches {
+        /* Called when a touch moves */
+        for touch in touches {
+            
+            let location = touch.locationInNode(self)
+            if location.x < 0 || location.y < 0 || location.x > 1344 || location.y > 750{return}
+            
+            if previousCircle == nil {
+                // this is the first circle
+                let circle = SKSpriteNode(color: SKColor.blackColor(), size: CGSize(width: 16, height: 16))
+                circle.name = "circle"
+                self.addChild(circle)
+                circle.position = location
+                previousCircle = circle
+            }
+            else {
+                // connect the previous circle to the touch location
                 
-                let location = touch.locationInNode(self)
+                let previousLocation = previousCircle!.convertPoint(CGPoint(x: -8, y: 0), toNode: self)
+                let diff = location - previousLocation
                 
-                    let square = SKSpriteNode(imageNamed: "Square")
-                    square.name = "square"
-                
-                    self.addChild(square)
-                    square.xScale = 0.06
-                    square.yScale = 0.06
-                    square.position = location
+                if diff.length() > 16 {
+                    let center = (location + previousLocation) * 0.5
+                    
+                    let circle = SKSpriteNode(color: SKColor.blackColor(), size: CGSize(width: 16, height: 16))
+                    circle.xScale = diff.length() / 16
+                    circle.zRotation = -CGFloat(atan2f(Float(diff.x), Float(diff.y))) - CGFloat(M_PI_2)
+                    circle.name = "circle"
+                    self.addChild(circle)
+                    circle.position = center
+                    previousCircle = circle
+                }
             }
         }
+    }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
         /* Set camera to follow lines */
-        cameraTarget = biggerBird
+        if twoState != .Active { return }
+        
+        biggerBird.color = defaultColor
+        cameraTarget = circle
         biggerBird.removeAllActions()
+        previousCircle = nil
         
             let path = CGPathCreateMutable()
             CGPathMoveToPoint(path, nil, biggerBird.position.x, biggerBird.position.y);
         
             if canDrawPath == true {
                 for child in self.children {
-                    if child.name == "square" {
+                    if child.name == "circle" {
                         CGPathAddLineToPoint(path, nil, child.position.x, child.position.y + 50);
-                        
-                        let move = SKAction.followPath(path, asOffset:false, orientToPath:false, duration:2.0)
-                        biggerBird.runAction(move)
                     }
                 }
+                let move = SKAction.followPath(path, asOffset:false, orientToPath:false, duration:2.0)
+                biggerBird.runAction(move)
             }
         }
     
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
+        if twoState != .Active { return }
         
         // Camera follows lines
         if let cameraTarget = cameraTarget {camera?.position = cameraTarget.position}
@@ -221,11 +240,21 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
         biggerBird.removeAllActions()
     }
     
-    func win() { nextArrow.hidden = false; backArrow.hidden = false; rainbow.hidden = false;
+    func win() {
         biggerBird.removeAllActions()
-        self.runAction(SKAction.playSoundFileNamed("Fanfare.wav", waitForCompletion: false))
-            let gameState: GameSceneState = .Paused
-            self.runAction(SKAction.playSoundFileNamed("Fanfare.wav", waitForCompletion: true))
+        for child in self.children {
+            if child.name == "circle"{
+                child.removeFromParent()
+            }
+        }
+        
+        twoState = .GameOver
+
+        nextArrow.hidden = false; backArrow.hidden = false; rainbow.hidden = false;
+        biggerBird.removeAllActions()
+       
+        if musicState == true {
+            self.runAction(SKAction.playSoundFileNamed("Winning-sound.wav", waitForCompletion: false))
+        }
     }
 }
-

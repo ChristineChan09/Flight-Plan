@@ -19,6 +19,7 @@ class SettingsScene: SKScene, SKPhysicsContactDelegate {
     override func didMoveToView(view: SKView) {
         /* Set reference to game object connections node */
         
+        
         /* Set UI connections */
         homeButton = self.childNodeWithName("homeButton") as! MSButtonNode
         volumeOn = self.childNodeWithName("volumeOn") as! MSButtonNode
@@ -41,43 +42,19 @@ class SettingsScene: SKScene, SKPhysicsContactDelegate {
             
             /* Start scene */
             skView.presentScene(scene)
-            
         }
         
-//        /* Volume off button selection handler */
-//        volumeOff.selectedHandler = {
-//            
-//            /* Grab reference to our SpriteKit view */
-//            let skView = self.view as SKView!
-//            
-//            if let musicURL = NSBundle.mainBundle().URLForResource("Calm_music", withExtension: "mp3") {
-//            self.backgroundMusic = SKAudioNode(URL: musicURL)
-//        }
-//            
-//            /* Ensure correct aspect mode */
-//            scene.scaleMode = .AspectFill
-//            
-//            /* Start game scene */
-//            skView.presentScene(scene)
-//            
-//        }
-//        /* Volume off button selection handler */
-//        volumeOff.selectedHandler = {
-//
-//            /* Grab reference to our SpriteKit view */
-//            let skView = self.view as SKView!
-//
-//            if let musicURL = NSBundle.mainBundle().URLForResource("Calm_music", withExtension: "mp3") {
-//            self.backgroundMusic = SKAudioNode(URL: musicURL)
-//        }
-//
-//            /* Ensure correct aspect mode */
-//            scene.scaleMode = .AspectFill
-//
-//            /* Start game scene */
-//            skView.presentScene(scene)
-//            
-//        }
+    
+        /* Set volume button controls */
+        volumeOn.selectedHandler = {
+            
+        /* Change music state */
+            musicState = true
+        }
+        volumeOff.selectedHandler = {
+            
+            musicState = false
+        }
     }
 }
-
+        

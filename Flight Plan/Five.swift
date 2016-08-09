@@ -1,30 +1,32 @@
 //
-//  Five.swift
+//  Six
 //  Flight Plan
 //
-//  Created by Cadence on 7/22/16.
+//  Created by Cadence on 8/04/16.
 //  Copyright © 2016 Christine Chan. All rights reserved.
 //
 import SpriteKit
-
+    
 enum FiveSceneState {
-    case Active, Paused, GameOver
+    case Active, GameOver
 }
-
+    
 class FiveScene: SKScene, SKPhysicsContactDelegate {
     
     /* Camera helpers */
+    var tinyBird: SKSpriteNode!
+    var square: SKSpriteNode!
     var cameraTarget: SKNode!
     
     /* UI Connections */
-    var lanternBird: SKSpriteNode!
     var backArrow: MSButtonNode!
-    var homeButton: MSButtonNode!
+    var nextArrow: MSButtonNode!
     var rainbow: MSButtonNode!
     var lastPosition: CGFloat = 0
     var backgroundMusic: SKAudioNode!
-    var Tutorial: SKLabelNode!
     var canDrawPath: Bool!
+    var defaultColor: SKColor = SKColor.whiteColor()
+    var previousSquare: SKNode?
     
     /* Change game state */
     var fiveState: FiveSceneState = .Active
@@ -32,24 +34,27 @@ class FiveScene: SKScene, SKPhysicsContactDelegate {
     override func didMoveToView(view: SKView) {
         /* Set reference to game object connections node */
         
-        if let musicURL = NSBundle.mainBundle().URLForResource("Calm_music", withExtension: "mp3") {
-            backgroundMusic = SKAudioNode(URL: musicURL)
+        if musicState == true {
+            let musicURL = NSBundle.mainBundle().URLForResource("Game-music", withExtension: "mp3")
+            backgroundMusic = SKAudioNode(URL: musicURL!)
+            
             addChild(backgroundMusic)
         }
-        
+            
         /* Setup bird character */
-        lanternBird = self.childNodeWithName("lanternBird") as! SKSpriteNode
+        tinyBird = self.childNodeWithName("tinyBird") as? SKSpriteNode
+        defaultColor = tinyBird.color
         
         /* Set UI connections */
         backArrow = self.childNodeWithName("backArrow") as! MSButtonNode
-        homeButton = self.childNodeWithName("homeButton") as! MSButtonNode
+        nextArrow = self.childNodeWithName("nextArrow") as! MSButtonNode
         rainbow = self.childNodeWithName("rainbow") as! MSButtonNode
         
         /* Hide back arrow */
         backArrow.hidden = true
         
-        /* Hide home button */
-        homeButton.hidden = true
+        /* Hide next arrow */
+        nextArrow.hidden = true
         
         /* Hide rainbow */
         rainbow.hidden = true
@@ -77,15 +82,15 @@ class FiveScene: SKScene, SKPhysicsContactDelegate {
             /* Start game scene */
             skView.presentScene(scene)
         }
-        
-            /* Home button selection handler */
-            homeButton.selectedHandler = {
             
-            /* Grab reference to our Spritekit view */
+        /* Next scene button selection handler */
+        self.nextArrow.selectedHandler = {
+            
+            /* Grab reference to our SpriteKit view */
             let skView = self.view as SKView!
             
-            /* Reload current scene */
-            let scene = MainScene(fileNamed: "MainScene") as MainScene!
+            /* Load next scene */
+            let scene = SixScene(fileNamed: "Six") as SixScene!
             
             /* Ensure correct aspect mode */
             scene.scaleMode = .AspectFill
@@ -94,107 +99,117 @@ class FiveScene: SKScene, SKPhysicsContactDelegate {
             skView.showsPhysics = false
             skView.showsDrawCount = false
             skView.showsFPS = false
-                
+            
             /* Start game scene */
             skView.presentScene(scene)
-          }
-        
-            /* Rainbow button selection handler */
-            rainbow.selectedHandler = {
-                
-            /* Grab reference to our Spritekit view */
-            let skView = self.view as SKView!
-            
-            /* Ensure correct aspect mode */
-            self.scene!.scaleMode = .AspectFill
-            
-            /* Show debug */
-            skView.showsPhysics = false
-            skView.showsDrawCount = false
-            skView.showsFPS = false
-            
-            /* Start game scene */
-            skView.presentScene(self.scene)
         }
-    }
-    
+        
+        /* Rainbow button selection handler */
+        self.rainbow.selectedHandler = {}
+        }
+        
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?){
         /* Called when a touch begins */
+        if fiveState != .Active {return}
+        
         for child in self.children {
-            if child.name == "circle"{
+            if child.name == "square"{
                 child.removeFromParent()
             }
         }
         
         let location = touches.first!.locationInNode(self)
-            if lanternBird.containsPoint(location) {
-                // player is touching the bird, start drawing
-                canDrawPath = true
-            }
-            else {
-                // player is not touching the bird; don't start drawing
-                canDrawPath = false
-            }
+        if tinyBird.containsPoint(location) {
+            // the user is touching the bird
+            canDrawPath = true
+            tinyBird.color = .grayColor()
         }
-    
+        else {
+            // the user is not touching the bird; don't start drawing
+            canDrawPath = false
+        }
+    }
+        
     override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        if fiveState != .Active { return }
+        
         /* Called when a touch moves */
         for touch in touches {
             
             let location = touch.locationInNode(self)
+            if location.x < 0 || location.y < 0 || location.x > 1344 || location.y > 750
+            {return}
             
-            let circle = SKSpriteNode(imageNamed: "Circle")
-            circle.name = "circle"
-            self.addChild(circle)
-            circle.xScale = 0.06
-            circle.yScale = 0.06
-            circle.position = location
-            
-        }
-    }
-    
-    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        /* Set camera to follow lines */
-        cameraTarget = lanternBird
-        lanternBird.removeAllActions()
-        
-        let path = CGPathCreateMutable()
-        CGPathMoveToPoint(path, nil, lanternBird.position.x, lanternBird.position.y);
-        
-        if canDrawPath == true {
-            for child in self.children {
-                if child.name == "circle" {
-                    CGPathAddLineToPoint(path, nil, child.position.x, child.position.y + 50);
+            if previousSquare == nil {
+                // this is the first square
+                let square = SKSpriteNode(color: SKColor.blackColor(), size: CGSize(width: 16, height: 16))
+                square.name = "square"
+                self.addChild(square)
+                square.position = location
+                previousSquare = square
+            }
+            else {
+                // connect the previous square to the touch location
+                
+                let previousLocation = previousSquare!.convertPoint(CGPoint(x: -8, y: 0), toNode: self)
+                let diff = location - previousLocation
+                
+                if diff.length() > 16 {
+                    let center = (location + previousLocation) * 0.5
                     
-                    let move = SKAction.followPath(path, asOffset:false, orientToPath:false, duration:2.0)
-                    lanternBird.runAction(move)
+                    let square = SKSpriteNode(color: SKColor.blackColor(), size: CGSize(width: 16, height: 16))
+                    square.xScale = diff.length() / 16
+                    square.zRotation = -CGFloat(atan2f(Float(diff.x), Float(diff.y))) - CGFloat(M_PI_2)
+                    square.name = "square"
+                    self.addChild(square)
+                    square.position = center
+                    previousSquare = square
                 }
             }
         }
     }
     
-    func updateCamera() {
-        if let camera = camera {
-            camera.position = CGPoint(x: lanternBird!.position.x, y: lanternBird!.position.y)
+    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        /* Set camera to follow lines */
+        if fiveState != .Active {return}
+        
+        tinyBird.color = defaultColor
+        cameraTarget = tinyBird
+        tinyBird.removeAllActions()
+        previousSquare = nil
+        
+        let path = CGPathCreateMutable()
+        CGPathMoveToPoint(path, nil, tinyBird.position.x, tinyBird.position.y);
+        
+        if canDrawPath == true {
+            for child in self.children {
+                if child.name == "square" {
+                    CGPathAddLineToPoint(path, nil, child.position.x, child.position.y + 50);
+                }
+            }
+            let move = SKAction.followPath(path, asOffset:false, orientToPath:false, duration:2.0)
+            tinyBird.runAction(move)
+            
         }
     }
     
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
+         if fiveState != .Active {return}
         
         // Camera follows lines
         if let cameraTarget = cameraTarget {camera?.position = cameraTarget.position}
         
         /* Clamp camera scrolling to our visible scene area only */
-        camera?.position.x.clamp(0, 1344)
+        camera?.position.x.clamp(180,580)
         
-        if lanternBird.position.x < lastPosition{
-            lanternBird.xScale = 1
+        if tinyBird.position.x < lastPosition{
+            tinyBird.xScale = 1
         } else {
-            lanternBird.xScale = -1
+            tinyBird.xScale = -1
         }
         
-        lastPosition = lanternBird.position.x
+        lastPosition = tinyBird.position.x
     }
     
     func didBeginContact(contact: SKPhysicsContact) {
@@ -202,33 +217,57 @@ class FiveScene: SKScene, SKPhysicsContactDelegate {
         /* Ensure only called while game is running */
         if fiveState != .Active { return }
         
+        if contact.bodyA.categoryBitMask == 2 || contact.bodyB.categoryBitMask == 2 {
+            self.runAction(SKAction.playSoundFileNamed("Crash-sound.wav", waitForCompletion: false))
+            
+            /* Change game state to game over */
+            
+            fiveState = .GameOver
+            
+            /* Grab reference to our SpriteKit view */
+            let skView = self.view! as SKView
+            
+            /* Load current scene */
+            let scene = FiveScene(fileNamed:"Five")!
+            
+            /* Ensure correct aspect mode */
+            scene.scaleMode = .AspectFill
+            
+            /* Restart current scene */
+            skView.presentScene(scene)
+            tinyBird.removeAllActions()
+
+        }
+       
         if contact.bodyA.categoryBitMask == 4 || contact.bodyB.categoryBitMask == 4 {
             print(contact.bodyA)
             print(contact.bodyB)
             win()
             return
         }
-        
-        /* Change game state to game over */
-        fiveState = .GameOver
-        
-        /* Grab reference to our SpriteKit view */
-        let skView = self.view! as SKView
-        
-        /* Load current scene */
-        let scene = FiveScene(fileNamed:"Five")!
-        
-        /* Ensure correct aspect mode */
-        scene.scaleMode = .AspectFill
-        
-        /* Restart current scene */
-        skView.presentScene(scene)
-        lanternBird.removeAllActions()
+        if contact.bodyA.categoryBitMask == 3 {
+            contact.bodyA.node!.runAction(SKAction.moveBy(CGVectorMake(28, 0), duration: 2))
+            
+            tinyBird.removeAllActions()
+        }
     }
     
-    func win() { backArrow.hidden = false; homeButton.hidden = false; rainbow.hidden = false;
-    lanternBird.removeAllActions()
-    self.runAction(SKAction.playSoundFileNamed("Fanfare.wav", waitForCompletion: true))
-        let gameScene: GameSceneState = .Paused
+    func win() {
+        tinyBird.removeAllActions()
+        for child in self.children {
+            if child.name == "square"{
+                child.removeFromParent()
+            }
+        }
+        
+        fiveState = .GameOver
+        
+        nextArrow.hidden = false; backArrow.hidden = false; rainbow.hidden = false;
+        tinyBird.removeAllActions()
+        
+        if musicState == true {
+            self.runAction(SKAction.playSoundFileNamed("Winning-sound.wav", waitForCompletion: false))
+        }
     }
 }
+

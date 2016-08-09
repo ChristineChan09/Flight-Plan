@@ -8,12 +8,15 @@
 
 import SpriteKit
 
+var musicState: Bool = true
+
 class MainScene: SKScene {
     
     /* UI Connections */
     var infoButton: MSButtonNode!
     var playButton: MSButtonNode!
     var settingsButton: MSButtonNode!
+    var chooseLevel: MSButtonNode!
     
     override func didMoveToView(view: SKView) {
         /* Setup your scene here */
@@ -22,8 +25,31 @@ class MainScene: SKScene {
         infoButton = self.childNodeWithName("infoButton") as! MSButtonNode
         playButton = self.childNodeWithName("playButton") as! MSButtonNode
         settingsButton = self.childNodeWithName("settingsButton") as! MSButtonNode
+        chooseLevel = self.childNodeWithName("chooseLevel") as! MSButtonNode
         
-        /* Setup restart button selection handler */
+        /* Setup information button selection handler */
+        infoButton.selectedHandler = {
+            
+            /* Grab reference to our SpriteKit view */
+            let skView = self.view as SKView!
+            
+            /* Load Game scene */
+            let scene = InfoScene(fileNamed: "Info") as InfoScene!
+            
+            /* Ensure correct aspect mode */
+            scene.scaleMode = .AspectFill
+            
+            /* Show debug */
+            skView.showsPhysics = false
+            skView.showsDrawCount = false
+            skView.showsFPS = false
+            
+            /* Start scene */
+            skView.presentScene(scene)
+            
+        }
+
+        /* Setup play button selection handler */
         playButton.selectedHandler = {
             
             /* Grab reference to our SpriteKit view */
@@ -65,14 +91,14 @@ class MainScene: SKScene {
             skView.presentScene(scene)
         }
         
-        /* Setup information button selection handler */
-        infoButton.selectedHandler = {
-            
+        /* Setup level selection handler */
+        chooseLevel.selectedHandler = {
+        
             /* Grab reference to our SpriteKit view */
             let skView = self.view as SKView!
             
-            /* Load Game scene */
-            let scene = InfoScene(fileNamed: "Info") as InfoScene!
+            /* Load Level scene */
+            let scene = LevelScene(fileNamed: "Level") as LevelScene!
             
             /* Ensure correct aspect mode */
             scene.scaleMode = .AspectFill
@@ -84,7 +110,6 @@ class MainScene: SKScene {
             
             /* Start scene */
             skView.presentScene(scene)
-        
         }
     }
 }
