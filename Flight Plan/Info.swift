@@ -32,7 +32,7 @@ class InfoScene: SKScene, SKPhysicsContactDelegate {
             let scene = MainScene(fileNamed: "MainScene") as MainScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false

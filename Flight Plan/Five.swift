@@ -13,12 +13,10 @@ enum FiveSceneState {
     
 class FiveScene: SKScene, SKPhysicsContactDelegate {
     
-    /* Camera helpers */
+    /* UI Connections */
     var tinyBird: SKSpriteNode!
     var square: SKSpriteNode!
-    var cameraTarget: SKNode!
     
-    /* UI Connections */
     var backArrow: MSButtonNode!
     var nextArrow: MSButtonNode!
     var rainbow: MSButtonNode!
@@ -72,7 +70,7 @@ class FiveScene: SKScene, SKPhysicsContactDelegate {
             let scene = FourScene(fileNamed: "Four") as FourScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -93,7 +91,7 @@ class FiveScene: SKScene, SKPhysicsContactDelegate {
             let scene = SixScene(fileNamed: "Six") as SixScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -170,11 +168,9 @@ class FiveScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        /* Set camera to follow lines */
         if fiveState != .Active {return}
         
         tinyBird.color = defaultColor
-        cameraTarget = tinyBird
         tinyBird.removeAllActions()
         previousSquare = nil
         
@@ -197,12 +193,6 @@ class FiveScene: SKScene, SKPhysicsContactDelegate {
         /* Called before each frame is rendered */
          if fiveState != .Active {return}
         
-        // Camera follows lines
-        if let cameraTarget = cameraTarget {camera?.position = cameraTarget.position}
-        
-        /* Clamp camera scrolling to our visible scene area only */
-        camera?.position.x.clamp(180,580)
-        
         if tinyBird.position.x < lastPosition{
             tinyBird.xScale = 1
         } else {
@@ -218,8 +208,7 @@ class FiveScene: SKScene, SKPhysicsContactDelegate {
         if fiveState != .Active { return }
         
         if contact.bodyA.categoryBitMask == 2 || contact.bodyB.categoryBitMask == 2 {
-            self.runAction(SKAction.playSoundFileNamed("Crash-sound.wav", waitForCompletion: false))
-            
+                    
             /* Change game state to game over */
             
             fiveState = .GameOver
@@ -231,7 +220,7 @@ class FiveScene: SKScene, SKPhysicsContactDelegate {
             let scene = FiveScene(fileNamed:"Five")!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Restart current scene */
             skView.presentScene(scene)

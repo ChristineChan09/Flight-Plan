@@ -29,7 +29,7 @@ class TutorialScene: SKScene, SKPhysicsContactDelegate {
             let scene = GameScene(fileNamed: "GameScene") as GameScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false

@@ -13,12 +13,10 @@ enum SixSceneState {
 
 class SixScene: SKScene, SKPhysicsContactDelegate {
     
-    /* Camera helpers */
+    /* UI Connections */
     var pelican: SKSpriteNode!
     var square: SKSpriteNode!
-    var cameraTarget: SKNode!
     
-    /* UI Connections */
     var backArrow: MSButtonNode!
     var nextArrow: MSButtonNode!
     var rainbow: MSButtonNode!
@@ -72,7 +70,7 @@ class SixScene: SKScene, SKPhysicsContactDelegate {
             let scene = FiveScene(fileNamed: "Five") as FiveScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -93,7 +91,7 @@ class SixScene: SKScene, SKPhysicsContactDelegate {
             let scene = SevenScene(fileNamed: "Seven") as SevenScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -170,11 +168,9 @@ class SixScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        /* Set camera to follow lines */
         if sixState != .Active {return}
         
         pelican.color = defaultColor
-        cameraTarget = pelican
         pelican.removeAllActions()
         previousSquare = nil
         
@@ -196,12 +192,6 @@ class SixScene: SKScene, SKPhysicsContactDelegate {
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
         if sixState != .Active {return}
-        
-        // Camera follows lines
-        if let cameraTarget = cameraTarget {camera?.position = cameraTarget.position}
-        
-        /* Clamp camera scrolling to our visible scene area only */
-        camera?.position.x.clamp(180,580)
         
         if pelican.position.x < lastPosition{
             pelican.xScale = -1
@@ -237,7 +227,6 @@ class SixScene: SKScene, SKPhysicsContactDelegate {
         /* Change game state to game over */
         
         if contact.bodyA.categoryBitMask == 2 || contact.bodyB.categoryBitMask == 2 {
-            self.runAction(SKAction.playSoundFileNamed("Crash-sound.wav", waitForCompletion: false))
             
             sixState = .GameOver
             
@@ -248,7 +237,7 @@ class SixScene: SKScene, SKPhysicsContactDelegate {
             let scene = SixScene(fileNamed:"Six")!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Restart current scene */
             skView.presentScene(scene)

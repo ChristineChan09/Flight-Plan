@@ -13,12 +13,10 @@ enum TwoSceneState {
 
 class TwoScene: SKScene, SKPhysicsContactDelegate {
     
-    /* Camera helpers */
-    var biggerBird: SKSpriteNode!
-    var circle: SKSpriteNode!
-    var cameraTarget: SKNode!
-    
     /* UI Connections */
+    var biggerBird: SKSpriteNode!
+    var square: SKSpriteNode!
+    
     var backArrow: MSButtonNode!
     var nextArrow: MSButtonNode!
     var rainbow: MSButtonNode!
@@ -26,7 +24,7 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
     var backgroundMusic: SKAudioNode!
     var canDrawPath: Bool!
     var defaultColor: SKColor = SKColor.whiteColor()
-    var previousCircle: SKNode?
+    var previousSquare: SKNode?
     
     /* Change game state */
     var twoState: TwoSceneState = .Active
@@ -71,7 +69,7 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
             let scene = GameScene(fileNamed: "GameScene") as GameScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -92,7 +90,7 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
             let scene = ThreeScene(fileNamed: "Three") as ThreeScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -113,7 +111,7 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
         if twoState != .Active { return }
         
         for child in self.children {
-            if child.name == "circle" {
+            if child.name == "square" {
                 child.removeFromParent()
             }
         }
@@ -140,50 +138,48 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
             let location = touch.locationInNode(self)
             if location.x < 0 || location.y < 0 || location.x > 1344 || location.y > 750{return}
             
-            if previousCircle == nil {
-                // this is the first circle
-                let circle = SKSpriteNode(color: SKColor.blackColor(), size: CGSize(width: 16, height: 16))
-                circle.name = "circle"
-                self.addChild(circle)
-                circle.position = location
-                previousCircle = circle
+            if previousSquare == nil {
+                // this is the first square
+                let square = SKSpriteNode(color: SKColor.blackColor(), size: CGSize(width: 16, height: 16))
+                square.name = "square"
+                self.addChild(square)
+                square.position = location
+                previousSquare = square
             }
             else {
-                // connect the previous circle to the touch location
+                // connect the previous square to the touch location
                 
-                let previousLocation = previousCircle!.convertPoint(CGPoint(x: -8, y: 0), toNode: self)
+                let previousLocation = previousSquare!.convertPoint(CGPoint(x: -8, y: 0), toNode: self)
                 let diff = location - previousLocation
                 
                 if diff.length() > 16 {
                     let center = (location + previousLocation) * 0.5
                     
-                    let circle = SKSpriteNode(color: SKColor.blackColor(), size: CGSize(width: 16, height: 16))
-                    circle.xScale = diff.length() / 16
-                    circle.zRotation = -CGFloat(atan2f(Float(diff.x), Float(diff.y))) - CGFloat(M_PI_2)
-                    circle.name = "circle"
-                    self.addChild(circle)
-                    circle.position = center
-                    previousCircle = circle
+                    let square = SKSpriteNode(color: SKColor.blackColor(), size: CGSize(width: 16, height: 16))
+                    square.xScale = diff.length() / 16
+                    square.zRotation = -CGFloat(atan2f(Float(diff.x), Float(diff.y))) - CGFloat(M_PI_2)
+                    square.name = "square"
+                    self.addChild(square)
+                    square.position = center
+                    previousSquare = square
                 }
             }
         }
     }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        /* Set camera to follow lines */
         if twoState != .Active { return }
         
         biggerBird.color = defaultColor
-        cameraTarget = circle
         biggerBird.removeAllActions()
-        previousCircle = nil
+        previousSquare = nil
         
             let path = CGPathCreateMutable()
             CGPathMoveToPoint(path, nil, biggerBird.position.x, biggerBird.position.y);
         
             if canDrawPath == true {
                 for child in self.children {
-                    if child.name == "circle" {
+                    if child.name == "square" {
                         CGPathAddLineToPoint(path, nil, child.position.x, child.position.y + 50);
                     }
                 }
@@ -195,12 +191,6 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
         if twoState != .Active { return }
-        
-        // Camera follows lines
-        if let cameraTarget = cameraTarget {camera?.position = cameraTarget.position}
-        
-        /* Clamp camera scrolling to our visible scene area only */
-        camera?.position.x.clamp(180,580)
         
         if biggerBird.position.x < lastPosition{
             biggerBird.xScale = -1
@@ -233,7 +223,7 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
         let scene = TwoScene(fileNamed:"Two")!
         
         /* Ensure correct aspect mode */
-        scene.scaleMode = .AspectFill
+        scene.scaleMode = .AspectFit
         
         /* Restart current scene */
         skView.presentScene(scene)
@@ -243,7 +233,7 @@ class TwoScene: SKScene, SKPhysicsContactDelegate {
     func win() {
         biggerBird.removeAllActions()
         for child in self.children {
-            if child.name == "circle"{
+            if child.name == "square"{
                 child.removeFromParent()
             }
         }

@@ -13,12 +13,10 @@ enum FourSceneState {
 
 class FourScene: SKScene, SKPhysicsContactDelegate {
     
-    /* Camera helpers */
+    /* UI Connections */
     var singingBird: SKSpriteNode!
     var square: SKSpriteNode!
-    var cameraTarget: SKNode!
     
-    /* UI Connections */
     var backArrow: MSButtonNode!
     var nextArrow: MSButtonNode!
     var rainbow: MSButtonNode!
@@ -72,7 +70,7 @@ class FourScene: SKScene, SKPhysicsContactDelegate {
             let scene = ThreeScene(fileNamed: "Three") as ThreeScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -94,7 +92,7 @@ class FourScene: SKScene, SKPhysicsContactDelegate {
             let scene = FiveScene(fileNamed: "Five") as FiveScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -171,11 +169,9 @@ class FourScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        /* Set camera to follow lines */
         if fourState != .Active {return}
         
         singingBird.color = defaultColor
-        cameraTarget = singingBird
         singingBird.removeAllActions()
         previousSquare = nil
         
@@ -197,12 +193,6 @@ class FourScene: SKScene, SKPhysicsContactDelegate {
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
         if fourState != .Active {return}
-        
-        // Camera follows lines
-        if let cameraTarget = cameraTarget {camera?.position = cameraTarget.position}
-        
-        /* Clamp camera scrolling to our visible scene area only */
-        camera?.position.x.clamp(180,580)
         
         if singingBird.position.x < lastPosition{
             singingBird.xScale = -1
@@ -235,7 +225,7 @@ class FourScene: SKScene, SKPhysicsContactDelegate {
         let scene = FourScene(fileNamed:"Four")!
         
         /* Ensure correct aspect mode */
-        scene.scaleMode = .AspectFill
+        scene.scaleMode = .AspectFit
         
         /* Restart current scene */
         skView.presentScene(scene)

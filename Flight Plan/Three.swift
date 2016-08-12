@@ -13,12 +13,10 @@ enum ThreeSceneState {
 
 class ThreeScene: SKScene, SKPhysicsContactDelegate {
     
-    /* Camera helpers */
+    /* UI Connections */
     var littleBird: SKSpriteNode!
     var square: SKSpriteNode!
-    var cameraTarget: SKNode!
     
-    /* UI Connections */
     var backArrow: MSButtonNode!
     var nextArrow: MSButtonNode!
     var rainbow: MSButtonNode!
@@ -71,7 +69,7 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
                 let scene = TwoScene(fileNamed: "Two") as TwoScene!
                 
                 /* Ensure correct aspect mode */
-                scene.scaleMode = .AspectFill
+                scene.scaleMode = .AspectFit
                 
                 /* Show debug */
                 skView.showsPhysics = false
@@ -92,7 +90,7 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
                     let scene = FourScene(fileNamed: "Four") as FourScene!
                     
                     /* Ensure correct aspect mode */
-                    scene.scaleMode = .AspectFill
+                    scene.scaleMode = .AspectFit
                     
                     /* Show debug */
                     skView.showsPhysics = false
@@ -168,11 +166,9 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        /* Set camera to follow lines */
         if threeState != .Active {return}
         
         littleBird.color = defaultColor
-        cameraTarget = littleBird
         littleBird.removeAllActions()
         previousSquare = nil
  
@@ -194,12 +190,6 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
         /* Called before each frame is rendered */
         if threeState != .Active {return}
         
-        // Camera follows lines
-        if let cameraTarget = cameraTarget {camera?.position = cameraTarget.position}
-        
-        /* Clamp camera scrolling to our visible scene area only */
-        camera?.position.x.clamp(180,580)
-                
         if littleBird.position.x < lastPosition{
             littleBird.xScale = -1
         } else {
@@ -231,7 +221,7 @@ class ThreeScene: SKScene, SKPhysicsContactDelegate {
         let scene = ThreeScene(fileNamed:"Three")!
         
         /* Ensure correct aspect mode */
-        scene.scaleMode = .AspectFill
+        scene.scaleMode = .AspectFit
         
         /* Restart current scene */
         skView.presentScene(scene)

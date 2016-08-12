@@ -37,12 +37,18 @@ class MainScene: SKScene {
             let scene = InfoScene(fileNamed: "Info") as InfoScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
             skView.showsDrawCount = false
             skView.showsFPS = false
+            
+            let background = SKSpriteNode(imageNamed: "Flight-Plan")
+            background.size = self.size
+            background.position = CGPoint(x: self.size.width/2, y: self.size.height/2)
+            background.zPosition = 0
+            self.addChild(background)
             
             /* Start scene */
             skView.presentScene(scene)
@@ -59,7 +65,7 @@ class MainScene: SKScene {
             let scene = TutorialScene(fileNamed: "Tutorial") as TutorialScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -80,7 +86,7 @@ class MainScene: SKScene {
             let scene = SettingsScene(fileNamed: "Settings") as SettingsScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -101,7 +107,7 @@ class MainScene: SKScene {
             let scene = LevelScene(fileNamed: "Level") as LevelScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false

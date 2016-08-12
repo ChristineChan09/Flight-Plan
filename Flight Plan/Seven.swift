@@ -73,7 +73,7 @@ class SevenScene: SKScene, SKPhysicsContactDelegate {
             let scene = SixScene(fileNamed: "Six") as SixScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -94,7 +94,7 @@ class SevenScene: SKScene, SKPhysicsContactDelegate {
             let scene = MainScene(fileNamed: "MainScene") as MainScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -244,7 +244,7 @@ class SevenScene: SKScene, SKPhysicsContactDelegate {
         let scene = SevenScene(fileNamed:"Seven")as SevenScene!
         
         /* Ensure correct aspect mode */
-        scene.scaleMode = .AspectFill
+        scene.scaleMode = .AspectFit
         
         /* Restart current scene */
         skView.presentScene(scene)

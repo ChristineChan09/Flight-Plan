@@ -43,7 +43,7 @@ class LevelScene: SKScene {
             let scene = MainScene(fileNamed: "MainScene") as MainScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -64,7 +64,7 @@ class LevelScene: SKScene {
             let scene = GameScene(fileNamed: "GameScene") as GameScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -85,7 +85,7 @@ class LevelScene: SKScene {
             let scene = TwoScene(fileNamed: "Two") as TwoScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -106,7 +106,7 @@ class LevelScene: SKScene {
             let scene = ThreeScene(fileNamed: "Three") as ThreeScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -127,7 +127,7 @@ class LevelScene: SKScene {
             let scene = FourScene(fileNamed: "Four") as FourScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -148,7 +148,7 @@ class LevelScene: SKScene {
             let scene = FiveScene(fileNamed: "Five") as FiveScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -169,7 +169,7 @@ class LevelScene: SKScene {
             let scene = SixScene(fileNamed: "Six") as SixScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false
@@ -190,7 +190,7 @@ class LevelScene: SKScene {
             let scene = SevenScene(fileNamed: "Seven") as SevenScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Show debug */
             skView.showsPhysics = false

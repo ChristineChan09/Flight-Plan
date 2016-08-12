@@ -38,7 +38,7 @@ class SettingsScene: SKScene, SKPhysicsContactDelegate {
             let scene = MainScene(fileNamed: "MainScene") as MainScene!
             
             /* Ensure correct aspect mode */
-            scene.scaleMode = .AspectFill
+            scene.scaleMode = .AspectFit
             
             /* Start scene */
             skView.presentScene(scene)
